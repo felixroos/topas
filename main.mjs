@@ -75,7 +75,7 @@ function initClock() {
     state.deadline = time - getAudioContext().currentTime;
     state.tick = tick;
     try {
-      state.ticker && state.ticker();
+      state.ticker && state.ticker({ ...state, tps, tickDuration });
     } catch (err) {
       console.error(err);
     }
