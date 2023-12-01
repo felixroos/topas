@@ -25,6 +25,7 @@ const state = {
   tps,
   tickDuration,
 };
+const minLatency = 0.01;
 
 // user functions in window scope
 Object.assign(window, {
@@ -34,7 +35,7 @@ Object.assign(window, {
   p(obj) {
     const { duration = 0.25, nudge = 0, chord, ...rest } = obj;
     if (!chord) {
-      return superdough(rest, state.deadline + nudge, duration);
+      return superdough(rest, state.deadline + nudge + minLatency, duration);
     }
     // really cheap chord function (just for testing)
     let chords = {
@@ -48,7 +49,11 @@ Object.assign(window, {
       return;
     }
     return chords[chord].map((note) =>
-      superdough({ ...rest, note }, state.deadline + nudge, duration)
+      superdough(
+        { ...rest, note },
+        state.deadline + nudge + minLatency,
+        duration
+      )
     );
   },
   bpm: (tempo) => {
