@@ -92,7 +92,7 @@ async function update() {
   window.location.hash = btoa(code);
 }
 input.innerHTML = code;
-input.addEventListener("keypress", (e) => {
+input.addEventListener("keydown", (e) => {
   if (e.ctrlKey && e.key === "Enter") {
     update();
   }
