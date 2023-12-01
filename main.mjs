@@ -20,7 +20,10 @@ const tps = 1 / tickDuration;
 
 console.log("hello");
 
-const state = {};
+const state = {
+  tps,
+  tickDuration,
+};
 
 // user functions in window scope
 Object.assign(window, {
@@ -75,7 +78,7 @@ function initClock() {
     state.deadline = time - getAudioContext().currentTime;
     state.tick = tick;
     try {
-      state.ticker && state.ticker({ ...state, tps, tickDuration });
+      state.ticker && state.ticker(state);
     } catch (err) {
       console.error(err);
     }
