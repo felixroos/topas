@@ -40,7 +40,7 @@ Object.assign(window, {
 });
 
 // default code
-let code = `
+let defaultCode = `
 bpm(93)
 beat(.5) && p({s:"hh"})
 beat(1) && p({s:"bd"})
@@ -50,6 +50,9 @@ beat(1,.5)
 && p({note:"f#",room:1},.25) 
 && p({note:"a",room:1},.15)
 `.trim();
+
+const codeParam = window.location.href.split("#")[1] || "";
+let code = codeParam ? hash2code(codeParam) : defaultCode;
 
 // "safe eval"
 function evaluate(str) {
@@ -86,6 +89,7 @@ async function update() {
     await play();
   }
   code = input.value;
+  window.location.hash = btoa(code);
 }
 input.innerHTML = code;
 input.addEventListener("keypress", (e) => {
@@ -102,3 +106,31 @@ document.getElementById("play").addEventListener("click", () => play());
 document.getElementById("eval").addEventListener("click", () => update());
 
 document.getElementById("stop").addEventListener("click", () => stop());
+
+// helpers
+
+export function unicodeToBase64(text) {
+  const utf8Bytes = new TextEncoder().encode(text);
+  const base64String = btoa(String.fromCharCode(...utf8Bytes));
+  return base64String;
+}
+
+export function base64ToUnicode(base64String) {
+  const utf8Bytes = new Uint8Array(
+    atob(base64String)
+      .split("")
+      .map((char) => char.charCodeAt(0))
+  );
+  const decodedText = new TextDecoder().decode(utf8Bytes);
+  return decodedText;
+}
+
+export function code2hash(code) {
+  return encodeURIComponent(unicodeToBase64(code));
+  //return '#' + encodeURIComponent(btoa(code));
+}
+
+export function hash2code(hash) {
+  return base64ToUnicode(decodeURIComponent(hash));
+  //return atob(decodeURIComponent(codeParam || ''));
+}
