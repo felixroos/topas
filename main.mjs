@@ -7,10 +7,11 @@ import {
 } from "superdough";
 import "zyklus";
 import "./style.css";
+import { topos } from "./topos.mjs";
 
 // load sounds
 const init = Promise.all([
-  initAudioOnFirstClick({ disableWorklets: true }),
+  initAudioOnFirstClick({ disableWorklets: false }),
   samples("github:tidalcycles/Dirt-Samples/master"),
   registerSynthSounds(),
 ]);
@@ -31,19 +32,29 @@ Object.assign(window, {
   superdough,
   samples,
   p(obj) {
-    const { duration = 0.25, nudge = 0, ...rest } = obj;
-    return superdough(rest, state.deadline + nudge, duration);
+    const { duration = 0.25, nudge = 0, chord, ...rest } = obj;
+    if (!chord) {
+      return superdough(rest, state.deadline + nudge, duration);
+    }
+    // really cheap chord function (just for testing)
+    let chords = {
+      C: ["c4", "e4", "g4"],
+      G: ["b3", "d4", "g4"],
+      Am7: ["a4", "c5", "e5", "g5"],
+      Bm7: ["b4", "d5", "f#5", "a5"],
+    };
+    if (!chords[chord]) {
+      console.error("chord not found", chord);
+      return;
+    }
+    return chords[chord].map((note) =>
+      superdough({ ...rest, note }, state.deadline + nudge, duration)
+    );
   },
-  pulse: (width) => {
-    return state.tick % width === 0;
-  },
-  beat: (n, nudge = 0) =>
-    (!Array.isArray(n) ? [n] : n).some(
-      (n) => !((state.tick - nudge * tps) % Math.floor(n * tps))
-    ),
   bpm: (tempo) => {
     clock.setDuration(() => (tickDuration * 60) / tempo);
   },
+  ...topos(state),
 });
 
 // default code
