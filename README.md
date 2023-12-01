@@ -4,11 +4,11 @@ this is a lightweight testbed to test [superdough](https://github.com/tidalcycle
 
 This project started as a poc to rewrite the scheduling of [topos](https://github.com/Bubobubobubobubo/Topos), but if you really want, here's an acronym that barely makes sense:
 
-- *t*testbed
-- *o*f
-- *p*attern
-- *a*gnostic
-- *s*uperdough
+- *T*estbed
+- *O*f
+- *P*attern
+- *A*gnostic
+- *S*uperdough
 
 ## Examples
 
