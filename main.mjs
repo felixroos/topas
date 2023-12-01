@@ -27,6 +27,8 @@ const state = {
 
 // user functions in window scope
 Object.assign(window, {
+  getAudioContext,
+  superdough,
   p(obj) {
     const { duration = 0.25, nudge = 0, ...rest } = obj;
     return superdough(rest, state.deadline + nudge, duration);
@@ -76,6 +78,7 @@ function initClock() {
   }
   clock = getAudioContext().createClock((time, duration, tick) => {
     state.deadline = time - getAudioContext().currentTime;
+    state.t = time;
     state.tick = tick;
     try {
       state.ticker && state.ticker(state);
