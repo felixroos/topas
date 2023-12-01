@@ -57,7 +57,7 @@ let code = codeParam ? hash2code(codeParam) : defaultCode;
 // "safe eval"
 function evaluate(str) {
   const body = `"use strict"; ${str}`;
-  return Function(body).call({ foo: true });
+  return Function(body).call(state);
 }
 
 let clock;
