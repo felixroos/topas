@@ -24,8 +24,9 @@ const state = {};
 
 // user functions in window scope
 Object.assign(window, {
-  p(obj, duration = 0.25) {
-    return superdough(obj, state.deadline, duration);
+  p(obj) {
+    const { duration = .25, nudge = 0, ...rest } = obj;
+    return superdough(rest, state.deadline + nudge, duration);
   },
   pulse: (width) => {
     return state.tick % width === 0;
