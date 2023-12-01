@@ -25,7 +25,7 @@ const state = {};
 // user functions in window scope
 Object.assign(window, {
   p(obj) {
-    const { duration = .25, nudge = 0, ...rest } = obj;
+    const { duration = 0.25, nudge = 0, ...rest } = obj;
     return superdough(rest, state.deadline + nudge, duration);
   },
   pulse: (width) => {
@@ -43,13 +43,16 @@ Object.assign(window, {
 // default code
 let defaultCode = `
 bpm(93)
-beat(.5) && p({s:"hh"})
-beat(1) && p({s:"bd"})
-beat(2) && p({s:"sd"})
-beat([.75,1],.5) && p({s:"jvbass",delay:.25})
-beat(1,.5) 
-&& p({note:"f#",room:1},.25) 
-&& p({note:"a",room:1},.15)
+
+function tick() {
+  beat(.5) && p({s:"hh"})
+  beat(1) && p({s:"bd"})
+  beat(2) && p({s:"sd"})
+  beat([.75,1],.5) && p({s:"jvbass",delay:.25})
+  beat(1,.5) 
+  && p({note:"f#",room:1},.25) 
+  && p({note:"a",room:1},.15)
+}
 `.trim();
 
 const codeParam = window.location.href.split("#")[1] || "";
@@ -57,54 +60,62 @@ let code = codeParam ? hash2code(codeParam) : defaultCode;
 
 // "safe eval"
 function evaluate(str) {
-  const body = `"use strict"; ${str}`;
+  const body = `"use strict"; ${str}; return tick`;
   return Function(body).call(state);
 }
 
-let clock;
-async function play() {
-  await init;
+let clock, started;
+
+// init clock
+function initClock() {
+  if (clock) {
+    return clock;
+  }
   clock = getAudioContext().createClock((time, duration, tick) => {
     state.deadline = time - getAudioContext().currentTime;
     state.tick = tick;
     try {
-      evaluate(code);
+      state.ticker && state.ticker();
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }, tickDuration);
-  clock.start();
+}
+
+async function run() {
+  await init;
+  initClock();
+  await update();
+  if (!started) {
+    clock.start();
+    started = true;
+  }
 }
 
 function stop() {
-  if (clock) {
-    clock.stop();
-  }
+  clock.stop();
+  started = false;
 }
 
 // ui
 
 const input = document.getElementById("code");
 async function update() {
-  if (!clock) {
-    await play();
-  }
   code = input.value;
+  state.ticker = evaluate(code);
   window.location.hash = btoa(code);
 }
 input.innerHTML = code;
 input.addEventListener("keydown", (e) => {
   if (e.ctrlKey && e.key === "Enter") {
-    update();
+    run();
   }
   if (e.ctrlKey && e.key === ".") {
     stop();
   }
 });
 
-document.getElementById("play").addEventListener("click", () => play());
-
-document.getElementById("eval").addEventListener("click", () => update());
+document.getElementById("play").addEventListener("click", () => run());
 
 document.getElementById("stop").addEventListener("click", () => stop());
 
