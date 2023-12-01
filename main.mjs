@@ -29,6 +29,7 @@ const state = {
 Object.assign(window, {
   getAudioContext,
   superdough,
+  samples,
   p(obj) {
     const { duration = 0.25, nudge = 0, ...rest } = obj;
     return superdough(rest, state.deadline + nudge, duration);
@@ -65,7 +66,10 @@ let code = codeParam ? hash2code(codeParam) : defaultCode;
 
 // "safe eval"
 function evaluate(str) {
-  const body = `"use strict"; ${str}; return tick`;
+  const body = `"use strict"; return (async () => {
+${str}
+return tick
+})()`;
   return Function(body).call(state);
 }
 
@@ -108,7 +112,7 @@ function stop() {
 const input = document.getElementById("code");
 async function update() {
   code = input.value;
-  state.ticker = evaluate(code);
+  state.ticker = await evaluate(code);
   window.location.hash = btoa(code);
 }
 input.innerHTML = code;
